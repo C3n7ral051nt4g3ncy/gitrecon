@@ -59,7 +59,7 @@ def print_github_results(user_data, keys):
     if user_data['company']:
         print('[bold red] [+] Company: [/bold red]' + user_data['company'])
     for org in github_recon.orgs_list:
-        print('[bold red] [+] Org: [/bold red]' + org)
+        print(f'[bold red] [+] Org: [/bold red]{org}')
     if user_data['blog']:
         print('[bold red] [+] Blog: [/bold red]' + user_data['blog'])
     if user_data['gravatar_id']:
@@ -71,7 +71,7 @@ def print_github_results(user_data, keys):
     print('[bold red] [+] Created at: [/bold red]' + str(user_data['created_at']))
     print('[bold red] [+] Updated at: [/bold red]' + str(user_data['updated_at']))
     for email in github_recon.valid_emails:
-        print('[bold red] [+] Leaked email: [/bold red]' + email)
+        print(f'[bold red] [+] Leaked email: [/bold red]{email}')
 
     if keys:
         console.rule('[bold blue]' + user_data['login'] + ' keys')
@@ -120,7 +120,7 @@ def print_gitlab_results(user_data, status, keys):
     except:
         pass
     for email in gitlab_recon.valid_emails:
-        print('[bold red] [+] Leaked email: [/bold red]' + email)
+        print(f'[bold red] [+] Leaked email: [/bold red]{email}')
 
     if keys:
         console.rule('[bold blue]' + user_data['username'] + ' keys')
@@ -135,12 +135,14 @@ def print_gitlab_results(user_data, status, keys):
 
 
 def create_github_json_output(user_data, keys):
-    json_output = {}
-    json_output['username'] = user_data['login']
-    json_output['name'] = user_data['name']
-    json_output['id'] = user_data['id']
-    json_output['avatar_url'] = user_data['avatar_url']
-    json_output['orgs'] = []
+    json_output = {
+        'username': user_data['login'],
+        'name': user_data['name'],
+        'id': user_data['id'],
+        'avatar_url': user_data['avatar_url'],
+        'orgs': [],
+    }
+
     if user_data['email']:
         json_output['email'] = user_data['email']
     if user_data['location']:
@@ -161,9 +163,7 @@ def create_github_json_output(user_data, keys):
     json_output['following'] = user_data['following']
     json_output['created_at'] = user_data['created_at']
     json_output['updated_at'] = user_data['updated_at']
-    json_output['leaked_emails'] = []
-    for email in github_recon.valid_emails:
-        json_output['leaked_emails'].append(email)
+    json_output['leaked_emails'] = list(github_recon.valid_emails)
     json_output['keys'] = []
     if keys:
         for key in keys:
@@ -173,12 +173,14 @@ def create_github_json_output(user_data, keys):
 
 
 def create_gitlab_json_output(user_data, status, keys):
-    json_output = {}
-    json_output['username'] = user_data['username']
-    json_output['name'] = user_data['name']
-    json_output['id'] = user_data['id']
-    json_output['state'] = user_data['state']
-    json_output['avatar_url'] = user_data['avatar_url']
+    json_output = {
+        'username': user_data['username'],
+        'name': user_data['name'],
+        'id': user_data['id'],
+        'state': user_data['state'],
+        'avatar_url': user_data['avatar_url'],
+    }
+
     if status['message']:
         json_output['description'] = status['message']
     if user_data['public_email']:
@@ -207,9 +209,7 @@ def create_gitlab_json_output(user_data, status, keys):
         json_output['created_at'] = user_data['created_at']
     except:
         pass
-    json_output['leaked_emails'] = []
-    for email in gitlab_recon.valid_emails:
-        json_output['leaked_emails'].append(email)
+    json_output['leaked_emails'] = list(gitlab_recon.valid_emails)
     json_output['keys'] = []
     if keys:
         for key in keys:
@@ -221,7 +221,7 @@ def create_gitlab_json_output(user_data, status, keys):
 
 
 def save_output(json_output):
-    path = 'results/' + args.username
+    path = f'results/{args.username}'
     if not os.path.exists(path):
         try:
             os.mkdir(path)
@@ -231,20 +231,26 @@ def save_output(json_output):
             print()
 
     if args.sites == 'github':
-        with open(path + '/' + args.username + '_github.json', 'w') as f:
+        with open(f'{path}/{args.username}_github.json', 'w') as f:
             json.dump(json_output, f)
-            print('[bold cyan] [+] Output saved: [/bold cyan]' + path + '/' + args.username + '_github.json')
+            print(
+                f'[bold cyan] [+] Output saved: [/bold cyan]{path}/{args.username}_github.json'
+            )
+
 
     if args.sites == 'gitlab':
-        with open(path + '/' + args.username + '_gitlab.json', 'w') as f:
+        with open(f'{path}/{args.username}_gitlab.json', 'w') as f:
             json.dump(json_output, f)
-            print('[bold cyan] [+] Output saved: [/bold cyan]' + path + '/' + args.username + '_gitlab.json')
+            print(
+                f'[bold cyan] [+] Output saved: [/bold cyan]{path}/{args.username}_gitlab.json'
+            )
+
 
     console.rule()
 
 
 def download_github_avatar(url):
-    path = 'results/' + args.username
+    path = f'results/{args.username}'
     if not os.path.exists(path):
         try:
             os.mkdir(path)
@@ -254,14 +260,20 @@ def download_github_avatar(url):
             print()
     r = requests.get(url)
     if args.sites == 'github':
-        with open(path + '/' + args.username + '_github_avatar.jpg', "wb") as f:
+        with open(f'{path}/{args.username}_github_avatar.jpg', "wb") as f:
             f.write(r.content)
-        print('[bold cyan] [+] Avatar downloaded: [/bold cyan]' + path + '/' + args.username + '_github.jpg')
+        print(
+            f'[bold cyan] [+] Avatar downloaded: [/bold cyan]{path}/{args.username}_github.jpg'
+        )
+
 
     if args.sites == 'gitlab':
-        with open(path + '/' + args.username + '_gitlab_avatar.jpg', "wb") as f:
+        with open(f'{path}/{args.username}_gitlab_avatar.jpg', "wb") as f:
             f.write(r.content)
-        print('[bold cyan] [+] Avatar downloaded: [/bold cyan]' + path + '/' + args.username + '_gitlab.jpg')
+        print(
+            f'[bold cyan] [+] Avatar downloaded: [/bold cyan]{path}/{args.username}_gitlab.jpg'
+        )
+
 
     console.rule()
 
